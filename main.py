@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import pandas as pd
 
+if 'user_file' not in st.session_state:
+    st.session_state.user_file=None
 if 'data' not in st.session_state:
     st.session_state.data=None
 if 'counter' not in st.session_state:
