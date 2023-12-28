@@ -102,13 +102,12 @@ if 'weights' not in st.session_state:
 #user uploads csv with their labelled data
 if st.session_state.input_data==None:
     st.session_state.input_data=st.file_uploader('Upload your training data', type=['.csv'], help='Upload the training dataset. It must include the following 3 columns: latitude, longitude and features')
-if st.session_state.input_data!=None:
+if st.session_state.input_data!=None and st.session_state.model==None:
     #once user uploaded csv, load into pandas dataframe, append images from google maps api, split into training and validation set
     st.session_state.input_data=pd.read_csv(st.session_state.input_data)
-    with st.spinner('Loading images from Google Maps API'):
+    with st.spinner('Preprocessing data for model training'):
         st.session_state.input_data = append_images(st.session_state.input_data)
 
-    with st.spinner('Preprocessing data for model training'):
         st.session_state.training_set, st.session_state.validation_set = training_validation(st.session_state.input_data)
     
         #configure dataset for performance
@@ -148,7 +147,7 @@ if st.session_state.input_data!=None:
         ])
 
         #compile and fit model to training data
-        model.compile(optimizer='adam',
+        st.session_state.model.compile(optimizer='adam',
                 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                 metrics=['accuracy'])
 
