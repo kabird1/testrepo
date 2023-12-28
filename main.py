@@ -152,8 +152,8 @@ if st.session_state.input_data!=None and st.session_state.model==None:
                 metrics=['accuracy'])
 
         st.session_state.model.fit(
-        training_dataset,
-        validation_data=validation_dataset,
+        st.session_state.training_set,
+        validation_data=st.session_state.validation_set,
         epochs=10
         )
 
