@@ -159,7 +159,7 @@ if st.session_state.input_data.empty==False and st.session_state.model==None:
 
         st.session_state.json_config = st.session_state.model.to_json()
         st.session_state.weights = st.session_state.model.get_weights()
-
+if st.session_state.input_data.empty==False and st.session_state.model!=None:
     st.download_button('Download model architecture', data=st.session_state.json_config, file_name='json_config.json')
     st.download_button('Download model weights', data=str(st.session_state.weights), file_name='weights.txt' )
 
