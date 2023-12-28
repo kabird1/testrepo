@@ -102,7 +102,7 @@ if 'weights' not in st.session_state:
 #user uploads csv with their labelled data
 if st.session_state.input_data.empty:
     st.session_state.input_data=st.file_uploader('Upload your training data', type=['.csv'], help='Upload the training dataset. It must include the following 3 columns: latitude, longitude and features')
-if st.session_state.input_data.empty()==False and st.session_state.model==None:
+if st.session_state.input_data.empty==False and st.session_state.model==None:
     #once user uploaded csv, load into pandas dataframe, append images from google maps api, split into training and validation set
     st.session_state.input_data=pd.read_csv(st.session_state.input_data)
     with st.spinner('Preprocessing data for model training'):
