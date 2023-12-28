@@ -1,3 +1,8 @@
-streamlit
-requests
+numpy
+PIL
+tensorflow
 pandas
+requests
+pathlib
+io
+streamlit
