@@ -3,5 +3,4 @@ tensorflow
 pandas
 requests
 pathlib
-io
 streamlit
