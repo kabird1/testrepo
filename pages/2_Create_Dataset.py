@@ -96,7 +96,7 @@ if st.session_state.user_file!=None:
     if len(st.session_state.data.latitude)>0:
         col1, col2 =st.columns(2)
         if 'image_box' not in st.session_state:
-            st.session_state.image_box = st.session_state.col1.empty()
+            st.session_state.image_box = col1.empty()
         load_new_image()
         col11, col12, col13, col14, col15, col16 = col1.columns(6)
         col11.button(label="Yes", help="Yes = The feature IS shown in the image", on_click=yes_button_callback, use_container_width=True)
