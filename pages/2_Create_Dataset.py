@@ -6,7 +6,7 @@ st.set_page_config(
     page_title='Generate Dataset',
     page_icon = 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.bv.com%2F&psig=AOvVaw3YnhxlSA0MkNfAiaVnuwVO&ust=1703970475689000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCOintOvGtYMDFQAAAAAdAAAAABAD',
     layout = 'centered',
-    initial_sidebar_state = 'auto'
+    initial_sidebar_state = 'wide'
 )
 
 if 'user_file' not in st.session_state:
