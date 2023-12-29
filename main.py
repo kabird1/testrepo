@@ -66,11 +66,11 @@ if 'model' not in st.session_state:
 
 if st.session_state.json_config==None:
     st.session_state.json_config = st.file_uploader('Upload the model architecture', type['.json'], help='File should be a .json file containing the model architecture')
-    st.session_state.json_config = json.load(st.session_state.json_config)
 if st.session_state.weights==None:
     st.session_state.weights = st.file_uploader('Upload the model weights:', type=['.txt'], help='File should be a .txt file containing the model weights.')
-    st.session_state.weights = numpy.genfromtxt(st.session_state.weights)
 if st.session_state.json_config!=None and st.session_state.weights!=None:
+    st.session_state.json_config = json.load(st.session_state.json_config)
+    st.session_state.weights = numpy.genfromtxt(st.session_state.weights)
     if st.session_state.model==None:
         with st.spinner('Preparing model for predictions'):
             model = keras.models.model_from_json(st.session_state.json_config)
