@@ -102,7 +102,7 @@ if 'input_file' not in st.session_state:
     st.session_state.input_file=None
 
 #user uploads csv with their labelled data
-if st.session_state.input_file==None:
+while st.session_state.input_file==None:
     st.session_state.input_file=st.file_uploader('Upload your training data', type=['.csv'], help='Upload the training dataset. It must include the following 3 columns: latitude, longitude and features')
 
 if st.session_state.input_file!=None and st.session_state.model==None:
@@ -162,7 +162,7 @@ if st.session_state.input_file!=None and st.session_state.model==None:
 
         st.session_state.json_config = st.session_state.model.to_json()
         st.session_state.weights = st.session_state.model.get_weights()
-if st.session_state.input_file!=None and st.session_state.model!=None:
+while st.session_state.input_file!=None and st.session_state.model!=None:
     st.download_button('Download model architecture', data=st.session_state.json_config, file_name='json_config.json')
     st.download_button('Download model weights', data=str(st.session_state.weights), file_name='weights.txt' )
 
