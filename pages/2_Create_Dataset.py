@@ -39,6 +39,7 @@ def load_new_image():
         #checks that map has any features... google api will not return maps for the ocean, only areas with features
         if map.ok:
             display_image = map.content
+            st.session_state.image_box.empty()
             st.session_state.image_box.image(image=display_image, caption="Satellite image at coordinates latitude="+str(latitude)+", longitude="+str(longitude)+", Copyright Map data ©2023")
         #if google api does not return a photo (i.e. no features at that coordinate) the csv file "features" column for that set of coordinates is set to "no"
         else:
@@ -95,7 +96,8 @@ if st.session_state.user_file!=None:
             st.session_state.data.at[st.session_state.counter, 'feature']=''
     if len(st.session_state.data.latitude)>0:
         col1, col2 =st.columns(2)
-        st.session_state.image_box = col1.empty()
+        if 'image_box' not in st.session_state:
+            st.session_state.image_box = col1.empty()
         load_new_image()
         col11, col12, col13, col14, col15, col16 = col1.columns(6)
         col11.button(label="Yes", help="Yes = The feature IS shown in the image", on_click=yes_button_callback, use_container_width=True)
