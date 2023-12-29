@@ -4,4 +4,3 @@ pandas
 requests
 pathlib
 streamlit
-pickle
