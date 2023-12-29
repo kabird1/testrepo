@@ -1,7 +1,6 @@
 import numpy as np
 import PIL
 import tensorflow as tf
-import pickle
 
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -14,6 +13,8 @@ from pathlib import Path
 import io
 
 import streamlit as st
+
+import json
 
 #gets images from google static maps api based on latitude and longitude, appends them to pandas dataframe as 3d numpy array in format (pixels x pixels x layers)
 def append_images(data):
@@ -41,133 +42,52 @@ def append_images(data):
             data.at[counter,'image']=image
     return (data)
 
-#split into training and validation datasets
-def training_validation(dataset_with_images):
-    #80% is used for training dataset, 20% for validation
-    no_training = round(0.8*(dataset_with_images['feature'].value_counts()['No']-1),0)
-    yes_training = round(0.8*(dataset_with_images['feature'].value_counts()['Yes']-1),0)
-    yes_counter=0
-    no_counter=0
-    training_counter=0
-    validation_counter=0
-
-    #training and validation sets have two columns
-    #image = 3d numpy array representation of the image
-    #label = yes or no label
-    training_set=pd.DataFrame(columns=['image', 'label'])
-    training_set['image'].astype(object)
-    training_set['label'].astype(object)
-    validation_set=pd.DataFrame(columns=['image','label'])
-    validation_set['image'].astype(object)
-    validation_set['label'].astype(object)
-
-    #80% of yes and 80% of no is placed in training dataset
-    #rest is placed in validation dataset
-    for counter in range(len(dataset_with_images.latitude)):
-        if dataset_with_images.at[counter,'feature']=='Yes':
-            if yes_counter<yes_training:
-                training_set.at[training_counter, 'image']=dataset_with_images.at[counter, 'image']
-                training_set.at[training_counter, 'label']=np.array([1])
-                training_counter+=1
-            else:
-                validation_set.at[validation_counter,'image']=dataset_with_images.at[counter, 'image']
-                validation_set.at[validation_counter, 'label']=np.array([1])
-                validation_counter+=1
-            yes_counter+=1   
+#takes an input dataset with the images in numpy array format and adds the yes or no predictions
+def make_prediction(prediction_dataset, model):
+    #turn dataframe into tensor
+    predict_tf = tf.data.Dataset.from_tensor_slices(list(prediction_dataset['image'].values)).batch(2)
+    #make predictions
+    predictions = model.predict(predict_tf)
+    #update user csv file with yes or no predictions
+    for counter in range(len(prediction_dataset.latitude)):
+        if np.argmax(predictions[counter])==0:
+            prediction_dataset.at[counter,'prediction']='no'
         else:
-            if no_counter<no_training:
-                training_set.at[training_counter, 'image']=dataset_with_images.at[counter, 'image']
-                training_set.at[training_counter, 'label']=np.array([0])
-                training_counter+=1
-            else:
-                validation_set.at[validation_counter,'image']=dataset_with_images.at[counter, 'image']
-                validation_set.at[validation_counter, 'label']=np.array([0])
-                validation_counter+=1
-            no_counter+=1 
-    
-    #convert to and return dataset objects
-    training_set=tf.data.Dataset.from_tensor_slices((list(training_set['image'].values), list(training_set['label'].values))).batch(2)
-    validation_set=tf.data.Dataset.from_tensor_slices((list(validation_set['image'].values), list(validation_set['label'].values))).batch(2)
-    return(training_set,validation_set)
+            prediction_dataset.at[counter,'prediction']='yes'
+    #return the dataframe with predictions, but remove the numpy array images
+    return prediction_dataset.drop(columns='image')
 
-#session state variables
 if 'input_data' not in st.session_state:
     st.session_state.input_data=None
-if 'model' not in st.session_state:
-    st.session_state.model=None
 if 'json_config' not in st.session_state:
     st.session_state.json_config=None
 if 'weights' not in st.session_state:
     st.session_state.weights = None
-if 'input_file' not in st.session_state:
-    st.session_state.input_file=None
+if 'model' not in st.session_state:
+    st.session_state.model = None
 
-#user uploads csv with their labelled data
-if st.session_state.input_file==None:
-    st.session_state.input_file=st.file_uploader('Upload your training data', type=['.csv'], help='Upload the training dataset. It must include the following 3 columns: latitude, longitude and features')
-
-if st.session_state.input_file!=None and st.session_state.model==None:
-    #once user uploaded csv, load into pandas dataframe, append images from google maps api, split into training and validation set
-    st.session_state.input_data=pd.read_csv(st.session_state.input_file)
-    with st.spinner('Preprocessing data for model training'):
-        st.session_state.input_data = append_images(st.session_state.input_data)
-
-        st.session_state.training_set, st.session_state.validation_set = training_validation(st.session_state.input_data)
+if st.session_state.json_config==None:
+    st.session_state.json_config = st.file_uploader('Upload the model architecture', type=['.json'], help='File should be a .json file containing the model architecture')
+if st.session_state.weights==None:
+    st.session_state.weights = st.file_uploader('Upload the model weights:', type=['.pkl'], help='File should be a .pkl file containing the model weights.')
+if st.session_state.json_config!=None and st.session_state.weights!=None:
+    st.session_state.json_config = json.load(st.session_state.json_config)
+    st.session_state.weights = pickle.load(st.session_state.weights)
     
-        #configure dataset for performance
-        AUTOTUNE = tf.data.AUTOTUNE
-        st.session_state.training_set = st.session_state.training_set.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
-        st.session_state.validation_set = st.session_state.validation_set.cache().prefetch(buffer_size=AUTOTUNE)
-
-    with st.spinner ('Creating, compiling and training model'):
-        #create model
-        #data augmentation layers
-        #improves model performance by rotating, zooming on images to create bigger training dataset
-        data_augmentation = keras.Sequential(
-        [
-        layers.RandomFlip("horizontal",
-                            input_shape=(640,
-                                        640,
-                                        1)),
-        layers.RandomRotation(0.1),
-        layers.RandomZoom(0.1),
-        ]
-        )
-
-        #make model with data augmentation layer and rescaling layer to normalize the values of each pixel
-        st.session_state.model = Sequential([
-        data_augmentation,
-        layers.Rescaling(1./255, input_shape=(640, 640, 1)),
-        layers.Conv2D(16, 1, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(32, 1, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(64, 1, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Dropout(0.2),
-        layers.Flatten(),
-        layers.Dense(128, activation='relu'),
-        layers.Dense(2)
-        ])
-
-        #compile and fit model to training data
-        st.session_state.model.compile(optimizer='adam',
-                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                metrics=['accuracy'])
-
-        st.session_state.model.fit(
-        st.session_state.training_set,
-        validation_data=st.session_state.validation_set,
-        epochs=10
-        )
-
-        st.session_state.json_config = st.session_state.model.to_json()
-        st.session_state.weights = st.session_state.model.get_weights()
-        st.session_state.weights = pickle.dumps(st.session_state.weights)
-if st.session_state.input_file!=None and st.session_state.model!=None:
-    col1, col2 = st.columns(2)
-    col1.download_button('Download model architecture', data=str(st.session_state.json_config), file_name='architecture.txt', use_container_width=True)
-    col2.download_button('Download model weights', data=st.session_state.weights, file_name='weights.pkl', use_container_width=True)
+    st.session_state.weights = st.session_state.weights
+    if st.session_state.model==None:
+        with st.spinner('Preparing model for predictions'):
+            model = keras.models.model_from_json(st.session_state.json_config)
+            model.set_weights(st.session_state.weights)
+    if st.session_state.model!=None:
+        if st.session_state.input_data.empty:
+            st.session_state.input_data = st.file_uploader('Upload a dataset to make predictions', type=['.csv'], help='File should be a .csv file containing two columns: latitude and longitude')
+        if st.session_state.input_data.empty==False:
+            with st.spinner('Reading input data and making predictions'):
+                st.session_state.input_data = pd.readcsv(st.session_state.input_data)
+                st.session_state.input_data = make_prediction(st.session_state.input_data,st.session_state.model)
+                st.data_editor(st.session_state.input_data)
+        
 
 
-    
+
