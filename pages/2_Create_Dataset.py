@@ -4,6 +4,7 @@ import pandas as pd
 
 st.set_page_config(
     page_title='Generate Dataset',
+    page_icon = 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.bv.com%2F&psig=AOvVaw3YnhxlSA0MkNfAiaVnuwVO&ust=1703970475689000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCOintOvGtYMDFQAAAAAdAAAAABAD',
     layout = 'wide',
     initial_sidebar_state = 'auto'
 )
@@ -19,6 +20,9 @@ if 'comments' not in st.session_state:
 if 'button_clicked' not in st.session_state:
     st.session_state.button_clicked = False
 
+col1, col2 =st.columns(2)
+image_box = col1.empty()
+col11, col12, col13, col14, col15, col16 = col1.columns(6)
 #function to load up images from google maps api:
 def load_new_image():
     if st.session_state.counter<len(st.session_state.data.latitude):
@@ -93,11 +97,7 @@ if st.session_state.user_file!=None:
             st.session_state.data=pd.read_csv(st.session_state.user_file)
             st.session_state.data.at[st.session_state.counter, 'feature']=''
     if len(st.session_state.data.latitude)>0:
-        col1, col2 =st.columns(2)
-        if 'image_box' not in st.session_state:
-            st.session_state.image_box = col1.empty()
         load_new_image()
-        col11, col12, col13, col14, col15, col16 = col1.columns(6)
         col11.button(label="Yes", help="Yes = The feature IS shown in the image", on_click=yes_button_callback, use_container_width=True)
         col12.button(label='No', help="No = The feature IS NOT shown in the image", on_click=no_button_callback, use_container_width=True)
         col13.button(label="Maybe", help = "Maybe = Unsure if feature is shown in the image", on_click=inc_button_callback, use_container_width=True)
