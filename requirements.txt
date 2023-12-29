@@ -3,5 +3,4 @@ requests
 pandas
 numpy
 tensorflow
-pickle
 pathlib
