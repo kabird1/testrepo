@@ -8,7 +8,6 @@ st.set_page_config(
     layout = 'centered',
     initial_sidebar_state = 'auto'
 )
-st.sidebar
 
 if 'user_file' not in st.session_state:
     st.session_state.user_file=None
