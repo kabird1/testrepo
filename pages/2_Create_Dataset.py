@@ -87,6 +87,7 @@ def next_image_callback():
 
 if st.session_state.user_file==None:
     st.session_state.user_file=st.file_uploader(label="Upload CSV", type={"csv","txt"}, help="CSV File containg the following columns latitude, longitude")
+    st.rerun()
 
 if st.session_state.user_file!=None:
     if st.session_state.counter==0 and st.session_state.button_clicked==False:
@@ -97,7 +98,6 @@ if st.session_state.user_file!=None:
         col1, col2 =st.columns(2)
         if 'image_box' not in st.session_state:
             st.session_state.image_box = col1.empty()
-        st.session_state.image_box.empty()
         load_new_image()
         col11, col12, col13, col14, col15, col16 = col1.columns(6)
         col11.button(label="Yes", help="Yes = The feature IS shown in the image", on_click=yes_button_callback, use_container_width=True)
