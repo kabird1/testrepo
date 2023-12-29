@@ -99,12 +99,12 @@ if 'json_config' not in st.session_state:
 if 'weights' not in st.session_state:
     st.session_state.weights = None
 
-#user uploads csv with their labelled data
+#user uploads csv with their labelled data and it is loaded to pandas dataframe
 if st.session_state.input_data.empty:
     st.session_state.input_data=st.file_uploader('Upload your training data', type=['.csv'], help='Upload the training dataset. It must include the following 3 columns: latitude, longitude and features')
-if st.session_state.input_data.empty==False and st.session_state.model==None:
-    #once user uploaded csv, load into pandas dataframe, append images from google maps api, split into training and validation set
     st.session_state.input_data=pd.read_csv(st.session_state.input_data)
+if st.session_state.input_data.empty==False and st.session_state.model==None:
+    #once user uploaded csv,append images from google maps api, split into training and validation set
     with st.spinner('Preprocessing data for model training'):
         st.session_state.input_data = append_images(st.session_state.input_data)
 
