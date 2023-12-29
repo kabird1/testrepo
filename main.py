@@ -164,7 +164,7 @@ if st.session_state.input_file!=None and st.session_state.model==None:
         st.session_state.weights = st.session_state.model.get_weights()
 if st.session_state.input_file!=None and st.session_state.model!=None:
     col1, col2 = st.columns(2)
-    col1.download_button('Download model architecture', data=st.session_state.json_config, file_name='json_config.json', use_container_width=True)
+    col1.download_button('Download model architecture', data=st.session_state.json_config, file_name='architecture.json', use_container_width=True)
     col2.download_button('Download model weights', data=str(st.session_state.weights), file_name='weights.txt', use_container_width=True)
 
 
