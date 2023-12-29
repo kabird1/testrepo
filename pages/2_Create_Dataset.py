@@ -86,7 +86,6 @@ def next_image_callback():
 
 if st.session_state.user_file==None:
     st.session_state.user_file=st.file_uploader(label="Upload CSV", type={"csv","txt"}, help="CSV File containg the following columns latitude, longitude")
-    st.rerun()
 
 if st.session_state.user_file!=None:
     if st.session_state.counter==0 and st.session_state.button_clicked==False:
