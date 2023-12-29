@@ -6,7 +6,6 @@ st.set_page_config(
     layout = 'centered',
     initial_sidebar_state = 'auto'
 )
-st.sidebar
 
 st.write('About: The goal of this app is to create a machine learning model to identify whether an object is present in a certain location using satellite images')
 st.write('See below for help topics for each component of the app:')
