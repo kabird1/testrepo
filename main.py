@@ -102,7 +102,7 @@ if 'input_file' not in st.session_state:
     st.session_state.input_file=None
 
 #user uploads csv with their labelled data
-if st.session_state.input_data==None:
+if st.session_state.input_file==None:
     st.session_state.input_file=st.file_uploader('Upload your training data', type=['.csv'], help='Upload the training dataset. It must include the following 3 columns: latitude, longitude and features')
 
 if st.session_state.input_file!=None and st.session_state.model==None:
