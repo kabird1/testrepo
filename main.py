@@ -99,70 +99,70 @@ if 'json_config' not in st.session_state:
 if 'weights' not in st.session_state:
     st.session_state.weights = None
 
-#user uploads csv with their labelled data and it is loaded to pandas dataframe
+#user uploads csv with their labelled data
 if st.session_state.input_data.empty:
     st.session_state.input_data=st.file_uploader('Upload your training data', type=['.csv'], help='Upload the training dataset. It must include the following 3 columns: latitude, longitude and features')
-    if st.session_state.input_data!=None:
+else:
+    if st.session_state.input_data.empty==False and st.session_state.model==None:
+        #once user uploaded csv, load into pandas dataframe, append images from google maps api, split into training and validation set
         st.session_state.input_data=pd.read_csv(st.session_state.input_data)
-if st.session_state.input_data.empty==False and st.session_state.model==None:
-    #once user uploaded csv,append images from google maps api, split into training and validation set
-    with st.spinner('Preprocessing data for model training'):
-        st.session_state.input_data = append_images(st.session_state.input_data)
+        with st.spinner('Preprocessing data for model training'):
+            st.session_state.input_data = append_images(st.session_state.input_data)
 
-        st.session_state.training_set, st.session_state.validation_set = training_validation(st.session_state.input_data)
-    
-        #configure dataset for performance
-        AUTOTUNE = tf.data.AUTOTUNE
-        st.session_state.training_set = st.session_state.training_set.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
-        st.session_state.validation_set = st.session_state.validation_set.cache().prefetch(buffer_size=AUTOTUNE)
+            st.session_state.training_set, st.session_state.validation_set = training_validation(st.session_state.input_data)
+        
+            #configure dataset for performance
+            AUTOTUNE = tf.data.AUTOTUNE
+            st.session_state.training_set = st.session_state.training_set.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+            st.session_state.validation_set = st.session_state.validation_set.cache().prefetch(buffer_size=AUTOTUNE)
 
-    with st.spinner ('Creating, compiling and training model'):
-        #create model
-        #data augmentation layers
-        #improves model performance by rotating, zooming on images to create bigger training dataset
-        data_augmentation = keras.Sequential(
-        [
-        layers.RandomFlip("horizontal",
-                            input_shape=(640,
-                                        640,
-                                        1)),
-        layers.RandomRotation(0.1),
-        layers.RandomZoom(0.1),
-        ]
-        )
+        with st.spinner ('Creating, compiling and training model'):
+            #create model
+            #data augmentation layers
+            #improves model performance by rotating, zooming on images to create bigger training dataset
+            data_augmentation = keras.Sequential(
+            [
+            layers.RandomFlip("horizontal",
+                                input_shape=(640,
+                                            640,
+                                            1)),
+            layers.RandomRotation(0.1),
+            layers.RandomZoom(0.1),
+            ]
+            )
 
-        #make model with data augmentation layer and rescaling layer to normalize the values of each pixel
-        st.session_state.model = Sequential([
-        data_augmentation,
-        layers.Rescaling(1./255, input_shape=(640, 640, 1)),
-        layers.Conv2D(16, 1, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(32, 1, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(64, 1, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Dropout(0.2),
-        layers.Flatten(),
-        layers.Dense(128, activation='relu'),
-        layers.Dense(2)
-        ])
+            #make model with data augmentation layer and rescaling layer to normalize the values of each pixel
+            st.session_state.model = Sequential([
+            data_augmentation,
+            layers.Rescaling(1./255, input_shape=(640, 640, 1)),
+            layers.Conv2D(16, 1, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(32, 1, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(64, 1, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Dropout(0.2),
+            layers.Flatten(),
+            layers.Dense(128, activation='relu'),
+            layers.Dense(2)
+            ])
 
-        #compile and fit model to training data
-        st.session_state.model.compile(optimizer='adam',
-                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                metrics=['accuracy'])
+            #compile and fit model to training data
+            st.session_state.model.compile(optimizer='adam',
+                    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                    metrics=['accuracy'])
 
-        st.session_state.model.fit(
-        st.session_state.training_set,
-        validation_data=st.session_state.validation_set,
-        epochs=10
-        )
+            st.session_state.model.fit(
+            st.session_state.training_set,
+            validation_data=st.session_state.validation_set,
+            epochs=10
+            )
 
-        st.session_state.json_config = st.session_state.model.to_json()
-        st.session_state.weights = st.session_state.model.get_weights()
-if st.session_state.input_data.empty==False and st.session_state.model!=None:
-    st.download_button('Download model architecture', data=st.session_state.json_config, file_name='json_config.json')
-    st.download_button('Download model weights', data=str(st.session_state.weights), file_name='weights.txt' )
+            st.session_state.json_config = st.session_state.model.to_json()
+            st.session_state.weights = st.session_state.model.get_weights()
+    if st.session_state.input_data.empty==False and st.session_state.model!=None:
+        st.download_button('Download model architecture', data=st.session_state.json_config, file_name='json_config.json')
+        st.download_button('Download model weights', data=str(st.session_state.weights), file_name='weights.txt' )
 
 
-    
+        
