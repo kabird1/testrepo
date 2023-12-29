@@ -1,6 +1,7 @@
 import numpy as np
 import PIL
 import tensorflow as tf
+import pickle
 
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -162,10 +163,11 @@ if st.session_state.input_file!=None and st.session_state.model==None:
 
         st.session_state.json_config = st.session_state.model.to_json()
         st.session_state.weights = st.session_state.model.get_weights()
+        st.session_state.weights = pickle.dumps(st.session_state.model_get_weights)
 if st.session_state.input_file!=None and st.session_state.model!=None:
     col1, col2 = st.columns(2)
     col1.download_button('Download model architecture', data=str(st.session_state.json_config), file_name='architecture.txt', use_container_width=True)
-    col2.download_button('Download model weights', data=str(st.session_state.weights.tobytes()), file_name='weights.txt', use_container_width=True)
+    col2.download_button('Download model weights', data=st.session_state.weights, file_name='weights.pkl', use_container_width=True)
 
 
     
