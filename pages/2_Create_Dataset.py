@@ -20,8 +20,6 @@ if 'comments' not in st.session_state:
 if 'button_clicked' not in st.session_state:
     st.session_state.button_clicked = False
 
-st.session_state.col1.empty()
-
 #function to load up images from google maps api:
 def load_new_image():
     if st.session_state.counter<len(st.session_state.data.latitude):
@@ -41,6 +39,7 @@ def load_new_image():
         #checks that map has any features... google api will not return maps for the ocean, only areas with features
         if map.ok:
             display_image = map.content
+            st.session_state.col1.empty()
             st.session_state.col1.image(image=display_image, caption="Satellite image at coordinates latitude="+str(latitude)+", longitude="+str(longitude)+", Copyright Map data ©2023")
         #if google api does not return a photo (i.e. no features at that coordinate) the csv file "features" column for that set of coordinates is set to "no"
         else:
