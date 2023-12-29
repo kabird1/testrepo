@@ -23,7 +23,7 @@ st.set_page_config(
 )
 
 st.write('Do not use this feature - for illustrative purposes only')
-st.write('Current hosting does not have enough resources and will cras upon model training')
+st.write('Current hosting does not have enough resources and will crash upon model training')
 #gets images from google static maps api based on latitude and longitude, appends them to pandas dataframe as 3d numpy array in format (pixels x pixels x layers)
 def append_images(data):
     for counter in range(len(data.latitude)):
