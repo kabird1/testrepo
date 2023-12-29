@@ -22,7 +22,6 @@ st.set_page_config(
     layout = 'centered',
     initial_sidebar_state = 'auto'
 )
-st.sidebar
 
 st.write('Do not use this feature - for illustrative purposes only')
 st.write('Current hosting does not have enough resources and will crash')
