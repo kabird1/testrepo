@@ -102,7 +102,7 @@ if st.session_state.user_file!=None:
         col3.button(label="Inconclusive", help = "Inconclusive = Unsure if feature is shown in the image", on_click=inc_button_callback, use_container_width=True)
         col4.button(label='Previous', help = 'Return to the previous image', on_click=prev_image_callback, use_container_width=True)
         st.session_state.counter=col5.number_input(label='#', help= 'Enter the index of the image that should be displayed', min_value=0, max_value=len(st.session_state.data.latitude)-1, value=st.session_state.counter, label_visibility="collapsed", on_change=load_new_image)
-        col6.button(label='Next', help = 'Move to the next image', on_click=next_image_callback, use_container_width=true)
+        col6.button(label='Next', help = 'Move to the next image', on_click=next_image_callback, use_container_width=True)
         user_edited_data = st.data_editor(data=st.session_state.data, use_container_width=True)
         st.session_state.data = user_edited_data
 
