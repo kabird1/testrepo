@@ -1,6 +1,0 @@
-numpy
-tensorflow
-pandas
-requests
-pathlib
-streamlit
